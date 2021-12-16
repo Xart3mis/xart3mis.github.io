@@ -2,16 +2,16 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>test blog</title>
-    <link>https://xart3mis.github.io/blogshit/</link>
+    <link>https://github.com/Xart3mis/xart3mis.github.io/</link>
     <description>Recent content on test blog</description>
     <generator>Hugo -- gohugo.io</generator>
-    <lastBuildDate>Thu, 16 Dec 2021 14:06:20 +0200</lastBuildDate><atom:link href="https://xart3mis.github.io/blogshit/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 16 Dec 2021 14:06:20 +0200</lastBuildDate><atom:link href="https://github.com/Xart3mis/xart3mis.github.io/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Post1</title>
-      <link>https://xart3mis.github.io/blogshit/post/post2/</link>
+      <link>https://github.com/Xart3mis/xart3mis.github.io/post/post2/</link>
       <pubDate>Thu, 16 Dec 2021 14:06:20 +0200</pubDate>
       
-      <guid>https://xart3mis.github.io/blogshit/post/post2/</guid>
+      <guid>https://github.com/Xart3mis/xart3mis.github.io/post/post2/</guid>
       <description>h1 Heading h2 Heading h3 Heading h4 Heading h5 Heading h6 Heading Emphasis This is bold text
 This is bold text
 This is italic text
@@ -26,10 +26,10 @@ Blockquotes  Blockquotes can also be nested&amp;hellip;
     
     <item>
       <title>Post2</title>
-      <link>https://xart3mis.github.io/blogshit/post/testpost/</link>
+      <link>https://github.com/Xart3mis/xart3mis.github.io/post/testpost/</link>
       <pubDate>Tue, 15 Sep 2020 11:30:03 +0000</pubDate>
       
-      <guid>https://xart3mis.github.io/blogshit/post/testpost/</guid>
+      <guid>https://github.com/Xart3mis/xart3mis.github.io/post/testpost/</guid>
       <description>h1 Heading h2 Heading h3 Heading h4 Heading h5 Heading h6 Heading Emphasis This is bold text
 This is bold text
 This is italic text
