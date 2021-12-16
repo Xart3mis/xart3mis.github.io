@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>test blog</title>
+    <link>https://xart3mis.github.io/blogshit/</link>
+    <description>Recent content on test blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <lastBuildDate>Thu, 16 Dec 2021 14:06:20 +0200</lastBuildDate><atom:link href="https://xart3mis.github.io/blogshit/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Post1</title>
+      <link>https://xart3mis.github.io/blogshit/post/post2/</link>
+      <pubDate>Thu, 16 Dec 2021 14:06:20 +0200</pubDate>
+      
+      <guid>https://xart3mis.github.io/blogshit/post/post2/</guid>
+      <description>h1 Heading h2 Heading h3 Heading h4 Heading h5 Heading h6 Heading Emphasis This is bold text
+This is bold text
+This is italic text
+This is italic text
+Strikethrough
+Blockquotes  Blockquotes can also be nested&amp;hellip;
+ &amp;hellip;by using additional greater-than signs right next to each other&amp;hellip;
+ &amp;hellip;or with spaces between arrows.
+   Lists Unordered
+ Create a list by starting a line with +, -, or * Sub-lists are made by indenting 2 spaces:  Marker character change forces new list start:  Ac tristique libero volutpat at Facilisis in pretium nisl aliquet Nulla volutpat aliquam velit     Very easy!</description>
+    </item>
+    
+    <item>
+      <title>Post2</title>
+      <link>https://xart3mis.github.io/blogshit/post/testpost/</link>
+      <pubDate>Tue, 15 Sep 2020 11:30:03 +0000</pubDate>
+      
+      <guid>https://xart3mis.github.io/blogshit/post/testpost/</guid>
+      <description>h1 Heading h2 Heading h3 Heading h4 Heading h5 Heading h6 Heading Emphasis This is bold text
+This is bold text
+This is italic text
+This is italic text
+Strikethrough
+Blockquotes  Blockquotes can also be nested&amp;hellip;
+ &amp;hellip;by using additional greater-than signs right next to each other&amp;hellip;
+ &amp;hellip;or with spaces between arrows.
+   Lists Unordered
+ Create a list by starting a line with +, -, or * Sub-lists are made by indenting 2 spaces:  Marker character change forces new list start:  Ac tristique libero volutpat at Facilisis in pretium nisl aliquet Nulla volutpat aliquam velit     Very easy!</description>
+    </item>
+    
+  </channel>
+</rss>

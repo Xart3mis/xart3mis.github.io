@@ -1,0 +1,3 @@
+User-agent: *
+Disallow:
+Sitemap: https://xart3mis.github.io/blogshit/sitemap.xml
