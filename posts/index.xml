@@ -8,12 +8,14 @@
     <language>en-us</language>
     <lastBuildDate>Sun, 16 Oct 2022 20:30:23 +0200</lastBuildDate><atom:link href="https://xart3mis.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>A blog concerning the development of AKILT</title>
-      <link>https://xart3mis.github.io/posts/akilt/</link>
+      <title>Writing a Keylogger in Go</title>
+      <link>https://xart3mis.github.io/posts/keylogger/</link>
       <pubDate>Sun, 16 Oct 2022 20:30:23 +0200</pubDate>
       
-      <guid>https://xart3mis.github.io/posts/akilt/</guid>
-      <description></description>
+      <guid>https://xart3mis.github.io/posts/keylogger/</guid>
+      <description>What is a Keylogger a computer program that records every keystroke made by a computer user, especially in order to gain fraudulent access to passwords and other confidential information.
+Code Explanation: Imports: import ( &amp;#34;fmt&amp;#34; &amp;#34;os&amp;#34; &amp;#34;os/signal&amp;#34; &amp;#34;syscall&amp;#34; &amp;#34;unsafe&amp;#34; &amp;#34;github.com/moutend/go-hook/pkg/keyboard&amp;#34; &amp;#34;github.com/moutend/go-hook/pkg/types&amp;#34; &amp;#34;golang.org/x/sys/windows&amp;#34; ) The 4 most important imported modules are syscall, github.com/moutend/go-hook/pkg/keyboard, github.com/moutend/go-hook/pkg/types, and golang.org/x/sys/windows
+go-hook is package by github user moutend that allows you to directly interface with low level windows keyboard hooks.</description>
     </item>
     
   </channel>

